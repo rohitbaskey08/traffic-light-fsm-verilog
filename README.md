@@ -14,6 +14,8 @@ The design uses **five states (S0–S4)** to control transitions between **GREEN
 
 # 🚗 Working Principle
 
+![Machine Diagram](/images/dia2.png)
+
 The traffic signal for the **main highway gets the highest priority** because vehicles are continuously present on the highway. Therefore, the highway signal remains **GREEN by default**.
 
 Occasionally, vehicles arrive at the **country road**. A **sensor** detects waiting vehicles and sends an input signal **X** to the controller:
@@ -65,9 +67,9 @@ These delays are configurable using delay parameters in the Verilog code.
 
 # 🔄 State Machine Diagram
 
-```md
+
 ![State Machine Diagram](/images/dia.png)
-```
+
 
 Example display:
 
