@@ -66,7 +66,7 @@ These delays are configurable using delay parameters in the Verilog code.
 # 🔄 State Machine Diagram
 
 ```md
-![State Machine Diagram](dia.png)
+![State Machine Diagram](/images/dia.png)
 ```
 
 Example display:
