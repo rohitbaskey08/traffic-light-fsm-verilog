@@ -1,107 +1,98 @@
-`timescale 1ns / 1ps
+`define TRUE    1'b1
+`define FALSE   1'b0
 
-`define y2rdelay  3
-`define r2gdelay  2
+`define RED     2'd0
+`define YELLOW  2'd1
+`define GREEN   2'd2
 
+// State definitions
+`define S0 3'd0
+`define S1 3'd1
+`define S2 3'd2
+`define S3 3'd3
+`define S4 3'd4
 
-module traffic_light(
-  input x, //if there any car in country road
-  input clk,clr,
-  output reg [1:0] hwy,cntry
-    );
-    //status of light
-    parameter RED = 2'd0,
-              YELLOW = 2'd1,
-              GREEN = 2'd2;
-     //state defination    HWY            CNTRY
-     parameter S0 = 3'd0,  //GREEN        RED
-               S1 = 3'd1,  //YELLOW       RED
-               S2 = 3'd2,  //RED          RED
-               S3 = 3'd3,  //RED          GREEN
-               S4 = 3'd4;  //RED          YELLOW
-    
+module sig_control (
+    output reg [1:0] hwy,
+    output reg [1:0] cntry,
+    input X,
+    input clock,
+    input clear
+);
+
     reg [2:0] state;
-    reg [3:0]count;
-    
-        
-     always @(*)
-      begin
-       hwy = GREEN;
-       cntry = RED;
-       case(state)
-        S0: ;
-        S1:hwy = YELLOW;
-        S2:hwy = RED;
-        S3:begin
-            hwy =RED;
-            cntry =  GREEN;
-        end
-        S4:begin
-            hwy = RED;
-            cntry = YELLOW;
-        end
-        endcase
-      end
-      
-      always @(posedge clk or  posedge clr) begin
-     if(clr) begin
-      state <= S0;
-      count <= 0;
-      end
-     else begin
- case(state)
+    reg [2:0] next_state;
 
- S0: begin
-      count<=0;
-      if(x)
-        state <= S1;
-      else
-        state <= S0;
-     end
-
- S1: begin
-      if(count < `y2rdelay)begin
-        state <= S1;
-        count <= count+1;
-        end 
-      else begin
-        state <= S2;
-        count<=0;
-     end
+    // State register
+    always @(posedge clock) begin
+        if (clear)
+            state <= `S0;
+        else
+            state <= next_state;
     end
- S2: begin
-      if(count < `r2gdelay) begin
-        state <= S2;
-        count <= count+1;
-        end
-      else begin
-        state <= S3;
-        count<=0;
-     end
- end
- S3: begin
-    count<=0;
-      if(x)
-        state <= S3;
-      else
-        state <= S4;
-     end
 
- S4: begin
-      if(count < `y2rdelay) begin
-        state <= S4;
-        count <= count+1;
-        end
-      else begin
-       state <= S0;
-        count <=0;
-        end
-     end
+    // Output logic
+    always @(*) begin
+        case (state)
+            `S0: begin
+                hwy   = `GREEN;
+                cntry = `RED;
+            end
 
- default: begin state <= S0;
-          count<=0;
-          end
- endcase
-end
-end   
+            `S1: begin
+                hwy   = `YELLOW;
+                cntry = `RED;
+            end
+
+            `S2: begin
+                hwy   = `RED;
+                cntry = `RED;
+            end
+
+            `S3: begin
+                hwy   = `RED;
+                cntry = `GREEN;
+            end
+
+            `S4: begin
+                hwy   = `RED;
+                cntry = `YELLOW;
+            end
+
+            default: begin
+                hwy   = `RED;
+                cntry = `RED;
+            end
+        endcase
+    end
+
+    // Next-state logic
+    always @(*) begin
+        if (clear)
+            next_state = `S0;
+        else begin
+            case (state)
+
+                `S0:
+                    next_state = (X) ? `S1 : `S0;
+
+                `S1:
+                    next_state = `S2;
+
+                `S2:
+                    next_state = `S3;
+
+                `S3:
+                    next_state = (X) ? `S3 : `S4;
+
+                `S4:
+                    next_state = `S0;
+
+                default:
+                    next_state = `S0;
+
+            endcase
+        end
+    end
+
 endmodule
